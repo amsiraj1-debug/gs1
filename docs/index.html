@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guitar Scale Tune: autotune for guitar solos</title>
+<style>
+:root{--bg:#f3f5f9;--fg:#131a2e;--mut:#56607a;--card:#fff;--line:#d9deea;--acc:#a85f00;--on:#131a2e;--onfg:#fff;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1424;--fg:#eef1f8;--mut:#9aa5c0;--card:#16203a;--line:#27324f;--acc:#f2b233;--on:#f2b233;--onfg:#1a1200;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1424;--fg:#eef1f8;--mut:#9aa5c0;--card:#16203a;--line:#27324f;--acc:#f2b233;--on:#f2b233;--onfg:#1a1200;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:860px;margin:0 auto;padding:0 20px 64px}
+h1,h2{font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-weight:700;letter-spacing:-.02em}
+h1{font-size:clamp(2.5rem,8vw,4.6rem);line-height:1;margin:14vh 0 .4em}
+h2{font-size:1.7rem;margin:2.6em 0 .5em}
+.lead{font-size:1.2rem;color:var(--mut);max-width:34em;margin:0 0 1.6em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:.45em .7em}
+.notes{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin:6px 0 18px}
+.n{text-align:center;padding:.6em 0;border-radius:6px;border:1px solid var(--line);color:var(--mut);font-size:clamp(.62rem,2.5vw,.9rem)}
+.n.on{background:var(--on);color:var(--onfg);border-color:var(--on);font-weight:600}
+.n.hit{outline:3px solid var(--acc);outline-offset:2px}
+input[type=range]{width:100%;accent-color:var(--acc)}
+#out{font-size:1.15rem;margin:.6em 0 0;min-height:3.2em}
+b{color:var(--acc)}
+dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px 32px}
+dt{font-weight:700}dd{margin:0;color:var(--mut)}
+#sc{display:flex;flex-wrap:wrap;gap:8px;padding:0;list-style:none}
+#sc li{border:1px solid var(--line);border-radius:99px;padding:.15em .8em;font-size:.92rem}
+code{background:var(--card);border:1px solid var(--line);border-radius:5px;padding:.05em .35em;font-size:.9em}
+ol{padding-left:1.2em}li{margin:.4em 0}
+@media(prefers-reduced-motion:no-preference){.n{transition:background .15s}}
+</style></head>
+<body><main>
+<h1>Every solo note lands in key.</h1>
+<p class="lead">Guitar Scale Tune is a VST3 plugin that listens to your guitar, finds the note you played, and nudges it to the nearest note of the scale you pick. Slightly flat bend, sloppy fret, drifting vibrato: it plays in tune.</p>
+
+<div class="card">
+  <div class="row"><select id="key" aria-label="Key"></select><select id="scale" aria-label="Scale"></select></div>
+  <div class="notes" id="notes" aria-hidden="true"></div>
+  <input id="p" type="range" min="40" max="79" step="0.01" value="57.3" aria-label="Pitch you played">
+  <p id="out"></p>
+</div>
+<p style="color:var(--mut);font-size:.95rem">Drag the slider as if you were bending a string. The ringed note is where the plugin sends it.</p>
+
+<h2>What it does</h2>
+<dl>
+<div><dt>Snaps to your scale</dt><dd>Choose a key and scale. Notes outside it are pulled to the closest one that belongs.</dd></div>
+<div><dt>Retune speed</dt><dd>0 ms is the hard robotic snap. Raise it to keep slides and bends natural.</dd></div>
+<div><dt>Amount and mix</dt><dd>Correct fully or only partly, and blend with the original tone.</dd></div>
+<div><dt>Built for single notes</dt><dd>Leads and solos. Quiet noise and pick scratches pass through untouched.</dd></div>
+</dl>
+
+<h2>Scales included</h2>
+<ul id="sc"></ul>
+
+<h2>Build it with GitHub Actions</h2>
+<ol>
+<li>Create a GitHub repo and push the project files.</li>
+<li>Open the <code>Actions</code> tab. The workflow builds Windows, macOS and Linux automatically.</li>
+<li>Download the <code>.vst3</code> from the run's Artifacts.</li>
+<li>Tag a version like <code>v1.0.0</code> and it publishes a Release with all three downloads.</li>
+</ol>
+<p style="color:var(--mut)">Latency is about 15 ms; DAWs compensate for it when mixing. For live monitoring, use the Standalone build with a low-latency audio interface.</p>
+</main>
+<script>
+const N=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const S=[["Chromatic","0 1 2 3 4 5 6 7 8 9 10 11"],["Major (Ionian)","0 2 4 5 7 9 11"],["Natural Minor (Aeolian)","0 2 3 5 7 8 10"],["Major Pentatonic","0 2 4 7 9"],["Minor Pentatonic","0 3 5 7 10"],["Blues (Minor)","0 3 5 6 7 10"],["Blues (Major)","0 2 3 4 7 9"],["Dorian","0 2 3 5 7 9 10"],["Phrygian","0 1 3 5 7 8 10"],["Lydian","0 2 4 6 7 9 11"],["Mixolydian","0 2 4 5 7 9 10"],["Locrian","0 1 3 5 6 8 10"],["Harmonic Minor","0 2 3 5 7 8 11"],["Melodic Minor","0 2 3 5 7 9 11"],["Phrygian Dominant","0 1 4 5 7 8 10"],["Hungarian Minor","0 2 3 6 7 8 11"],["Double Harmonic","0 1 4 5 7 8 11"],["Lydian Dominant","0 2 4 6 7 9 10"],["Altered","0 1 3 4 6 8 10"],["Whole Tone","0 2 4 6 8 10"],["Diminished (W-H)","0 2 3 5 6 8 9 11"],["Diminished (H-W)","0 1 3 4 6 7 9 10"],["Hirajoshi","0 2 3 7 8"]].map(([n,s])=>[n,s.split(" ").map(Number)]);
+const $=id=>document.getElementById(id);
+N.forEach((n,i)=>$("key").add(new Option(n+" key",i,false,i==9)));
+S.forEach(([n],i)=>{$("scale").add(new Option(n,i,false,i==4));$("sc").insertAdjacentHTML("beforeend","<li>"+n+"</li>")});
+$("notes").innerHTML=N.map(n=>"<div class='n'>"+n+"</div>").join("");
+const name=m=>N[((m%12)+12)%12]+(Math.floor(m/12)-1);
+function upd(){
+  const k=+$("key").value,st=S[$("scale").value][1],inS=new Set(st.map(s=>(k+s)%12)),m=+$("p").value;
+  let best=0,bd=99;
+  for(let n=Math.round(m)-6;n<=Math.round(m)+6;n++){const d=Math.abs(m-n);if(inS.has(((n%12)+12)%12)&&d<bd){bd=d;best=n}}
+  [...$("notes").children].forEach((e,i)=>{e.className="n"+(inS.has(i)?" on":"")+(i==((best%12)+12)%12?" hit":"")});
+  const r=Math.round(m),c=Math.round((m-r)*100),sh=Math.round((best-m)*100);
+  $("out").innerHTML="You played <b>"+name(r)+(c>=0?" +":" ")+c+"¢</b> &rarr; plays <b>"+name(best)+"</b>"+(Math.abs(sh)<2?" (already in tune)":" (shifted "+(sh>0?"+":"")+sh+"¢)");
+}
+["key","scale","p"].forEach(i=>$(i).addEventListener("input",upd));upd();
+</script></body></html>
